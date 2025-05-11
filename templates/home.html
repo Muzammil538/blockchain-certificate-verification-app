@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="jumbotron">
+    <h1 class="display-4">Blockchain Certificate Manager</h1>
+    <p class="lead">A secure system for storing and verifying certificates using blockchain technology.</p>
+    <hr class="my-4">
+    <p>This system allows you to:</p>
+    <ul>
+        <li>Upload certificates and store their hashes in a blockchain</li>
+        <li>Verify the authenticity of any certificate</li>
+        <li>View all certificates in the blockchain</li>
+    </ul>
+    <div class="mt-4">
+        <a class="btn btn-primary btn-lg" href="{{ url_for('upload') }}" role="button">Upload Certificate</a>
+        <a class="btn btn-success btn-lg ms-2" href="{{ url_for('verify') }}" role="button">Verify Certificate</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <h3>How It Works</h3>
+        <p>Each certificate is hashed and stored in a block along with its metadata. The blocks are chained together using cryptographic hashes, making the data tamper-evident.</p>
+    </div>
+    <div class="col-md-4">
+        <h3>Security</h3>
+        <p>The blockchain ensures that once a certificate is recorded, it cannot be altered without detection. Verification is done by comparing file hashes.</p>
+    </div>
+    <div class="col-md-4">
+        <h3>Transparency</h3>
+        <p>All certificates in the blockchain can be viewed, providing a transparent record of all issued certificates.</p>
+    </div>
+</div>
+{% endblock %}

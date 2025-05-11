@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Verify Certificate</h2>
+<p>Upload a certificate file to verify its authenticity against the blockchain.</p>
+
+<form method="POST" enctype="multipart/form-data" class="mt-4 mb-5">
+    <div class="mb-3">
+        <label for="file" class="form-label">Certificate File</label>
+        <input class="form-control" type="file" id="file" name="file" required>
+        <div class="form-text">Supported formats: PDF, PNG, JPG, DOC, DOCX</div>
+    </div>
+    <button type="submit" class="btn btn-primary">Verify Certificate</button>
+</form>
+
+{% if found is defined %}
+    {% if found %}
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h4>Certificate Verification Successful</h4>
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">{{ certificate.data.name }}</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Issued To:</strong> {{ certificate.data.issued_to }}</p>
+                        <p><strong>Issued By:</strong> {{ certificate.data.issued_by }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Issue Date:</strong> {{ certificate.data.issue_date }}</p>
+                        <p><strong>Course:</strong> {{ certificate.data.course }}</p>
+                    </div>
+                </div>
+                <p class="card-text">{{ certificate.data.description }}</p>
+                <div class="alert alert-info">
+                    <strong>Blockchain Details:</strong><br>
+                    <small>Block Index: {{ certificate.index }}<br>
+                    Timestamp: {{ certificate.timestamp }}<br>
+                    File Hash: <code>{{ certificate.file_hash }}</code></small>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="alert alert-danger">
+            <h4>Certificate Not Found</h4>
+            <p>The uploaded certificate does not exist in the blockchain or has been tampered with.</p>
+        </div>
+    {% endif %}
+{% endif %}
+{% endblock %}
