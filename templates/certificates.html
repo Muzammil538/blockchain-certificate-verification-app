@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>All Certificates in Blockchain</h2>
+<p>Below is a list of all certificates stored in the blockchain.</p>
+
+<div class="table-responsive mt-4">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Issued To</th>
+                <th>Issued By</th>
+                <th>Date</th>
+                <th>Course</th>
+                <th>Hash</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cert in certificates %}
+            <tr>
+                <td>{{ cert.index }}</td>
+                <td>{{ cert.data.name }}</td>
+                <td>{{ cert.data.issued_to }}</td>
+                <td>{{ cert.data.issued_by }}</td>
+                <td>{{ cert.data.issue_date }}</td>
+                <td>{{ cert.data.course }}</td>
+                <td><small><code>{{ cert.file_hash[:10] }}...</code></small></td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7" class="text-center">No certificates found in the blockchain</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

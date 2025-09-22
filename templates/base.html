@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Blockchain Certificate Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <nav class="bg-gray-900 shadow">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <a href="{{ url_for('home') }}" class="text-2xl font-bold text-white tracking-wide">Certificate Blockchain</a>
+            <button class="lg:hidden text-gray-300 focus:outline-none" id="nav-toggle">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+            <div class="hidden lg:flex lg:items-center w-full lg:w-auto" id="nav-menu">
+                <ul class="flex flex-col lg:flex-row lg:space-x-6 mt-4 lg:mt-0">
+                    <li><a class="block text-gray-300 py-2 px-3 rounded hover:bg-gray-800 hover:text-blue-400 transition" href="{{ url_for('home') }}">Home</a></li>
+                    <li><a class="block text-gray-300 py-2 px-3 rounded hover:bg-gray-800 hover:text-blue-400 transition" href="{{ url_for('upload') }}">Upload Certificate</a></li>
+                    <li><a class="block text-gray-300 py-2 px-3 rounded hover:bg-gray-800 hover:text-blue-400 transition" href="{{ url_for('verify') }}">Verify Certificate</a></li>
+                </ul>
+                <ul class="flex flex-col lg:flex-row lg:space-x-4 mt-4 lg:mt-0 lg:ml-8">
+                    {% if session.get('username') %}
+                    <li>
+                        {% if session.get('role') == 'admin' %}
+                        <a class="block text-gray-300 py-2 px-3 rounded hover:bg-gray-800 hover:text-blue-400 transition" href="{{ url_for('admin_dashboard') }}">Dashboard</a>
+                        {% else %}
+                        <a class="block text-gray-300 py-2 px-3 rounded hover:bg-gray-800 hover:text-blue-400 transition" href="{{ url_for('user_dashboard') }}">Dashboard</a>
+                        {% endif %}
+                    </li>
+
+                        <li>
+                            <span class="block py-2 px-3 text-gray-300">Hello, <span class="font-semibold">{{ session['username'] }}</span></span>
+                        </li>
+                        <li>
+                            <a class="block py-2 px-3 rounded text-gray-300 hover:bg-gray-800 hover:text-red-400 transition" href="{{ url_for('logout') }}">Logout</a>
+                        </li>
+                    {% else %}
+                        <li>
+                            <a class="block py-2 px-3 rounded text-gray-300 hover:bg-gray-800 hover:text-blue-400 transition" href="{{ url_for('login') }}">Login</a>
+                        </li>
+                        <li>
+                            <a class="block py-2 px-3 rounded text-gray-300 hover:bg-gray-800 hover:text-blue-400 transition" href="{{ url_for('register') }}">Register</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+        <!-- Mobile menu -->
+        <div class="lg:hidden hidden px-4 pb-4 bg-gray-900" id="nav-mobile">
+            <ul class="space-y-2">
+                <li><a class="block py-2 px-3 rounded hover:bg-gray-800 hover:text-blue-400 transition" href="{{ url_for('home') }}">Home</a></li>
+                <li><a class="block py-2 px-3 rounded hover:bg-gray-800 hover:text-blue-400 transition" href="{{ url_for('upload') }}">Upload Certificate</a></li>
+                <li><a class="block py-2 px-3 rounded hover:bg-gray-800 hover:text-blue-400 transition" href="{{ url_for('verify') }}">Verify Certificate</a></li>
+                <li><a class="block py-2 px-3 rounded hover:bg-gray-800 hover:text-blue-400 transition" href="{{ url_for('certificates') }}">View Certificates</a></li>
+                {% if session.get('username') %}
+                    <li>
+                        <span class="block py-2 px-3 text-gray-300">Hello, <span class="font-semibold">{{ session['username'] }}</span></span>
+                    </li>
+                    <li>
+                        <a class="block py-2 px-3 rounded hover:bg-gray-800 hover:text-red-400 transition" href="{{ url_for('logout') }}">Logout</a>
+                    </li>
+                {% else %}
+                    <li>
+                        <a class="block py-2 px-3 rounded hover:bg-gray-800 hover:text-blue-400 transition" href="{{ url_for('login') }}">Login</a>
+                    </li>
+                    <li>
+                        <a class="block py-2 px-3 rounded hover:bg-gray-800 hover:text-blue-400 transition" href="{{ url_for('register') }}">Register</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Flash messages -->
+    <div class="container mx-auto mt-6 px-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="mb-4">
+                        <div class="rounded px-4 py-3 text-white
+                            {% if category == 'success' %}bg-green-500
+                            {% elif category == 'error' %}bg-red-500
+                            {% else %}bg-blue-500{% endif %}">
+                            {{ message }}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white text-center py-4 mt-auto">
+        <div class="container mx-auto">
+            <p>Blockchain Certificate Verification System &copy; 2025</p>
+        </div>
+    </footer>
+
+    <script>
+        // Navbar toggle for mobile
+        const navToggle = document.getElementById('nav-toggle');
+        const navMenu = document.getElementById('nav-menu');
+        const navMobile = document.getElementById('nav-mobile');
+        navToggle.addEventListener('click', () => {
+            navMobile.classList.toggle('hidden');
+        });
+    </script>
+</body>
+</html>

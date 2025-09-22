@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-4xl mx-auto bg-white rounded-lg shadow p-8 mt-10">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">User Dashboard</h2>
+            <p class="text-gray-600">Welcome, <span class="font-semibold">{{ session['username'] }}</span>!</p>
+        </div>
+        <div class="flex gap-3 mt-4 md:mt-0">
+            <a href="{{ url_for('upload') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded shadow transition">Upload Document</a>
+            <a href="{{ url_for('logout') }}" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-6 rounded shadow transition">Logout</a>
+        </div>
+    </div>
+    <h3 class="text-xl font-semibold text-gray-700 mb-4">Your Approved Documents</h3>
+    <div class="overflow-x-auto">
+        <table class="min-w-full bg-white border border-gray-200 rounded-lg shadow">
+            <thead>
+                <tr class="bg-gray-100 text-gray-700">
+                    <th class="py-3 px-4 border-b">#</th>
+                    <th class="py-3 px-4 border-b">Type</th>
+                    <th class="py-3 px-4 border-b">Details</th>
+                    <th class="py-3 px-4 border-b">Download</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if certificates %}
+                    {% for block in certificates %}
+                        <tr class="hover:bg-gray-50">
+                            <td class="py-2 px-4 border-b text-center">{{ loop.index }}</td>
+                            <td class="py-2 px-4 border-b">
+                                {% if block.data.doc_type == 'personal_info' %}
+                                    Personal Info
+                                {% else %}
+                                    Certificate/Memo
+                                {% endif %}
+                            </td>
+                            <td class="py-2 px-4 border-b">
+                                {% if block.data.doc_type == 'personal_info' %}
+                                    <strong>Aadhaar:</strong> {{ block.data.aadhar }}<br>
+                                    <strong>PAN:</strong> {{ block.data.pan }}
+                                {% else %}
+                                    <strong>Name:</strong> {{ block.data.name }}<br>
+                                    <strong>Issued To:</strong> {{ block.data.issued_to }}<br>
+                                    <strong>Issued By:</strong> {{ block.data.issued_by }}<br>
+                                    <strong>Date:</strong> {{ block.data.issue_date }}<br>
+                                    <strong>Course:</strong> {{ block.data.course }}
+                                {% endif %}
+                            </td>
+                            <td class="py-2 px-4 border-b">
+                                <a href="{{ url_for('download', filename=block.data.filename) }}" class="text-blue-600 hover:underline">Download</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="4" class="py-4 px-4 text-center text-gray-500">No documents approved yet.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

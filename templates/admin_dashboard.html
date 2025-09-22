@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-6xl mx-auto bg-white rounded-lg shadow p-8 mt-10">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">Admin Dashboard</h2>
+            <p class="text-gray-600">Welcome, <span class="font-semibold">{{ session['username'] }}</span> (Admin)!</p>
+        </div>
+        <a href="{{ url_for('logout') }}" class="mt-4 md:mt-0 inline-block bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-6 rounded shadow transition">Logout</a>
+    </div>
+    <h3 class="text-xl font-semibold text-gray-700 mb-4">Pending Approvals</h3>
+    <div class="overflow-x-auto mb-10">
+        <table class="min-w-full bg-white border border-gray-200 rounded-lg shadow">
+            <thead>
+                <tr class="bg-yellow-100 text-gray-700">
+                    <th class="py-3 px-4 border-b">#</th>
+                    <th class="py-3 px-4 border-b">Type</th>
+                    <th class="py-3 px-4 border-b">Details</th>
+                    <th class="py-3 px-4 border-b">Uploaded By</th>
+                    <th class="py-3 px-4 border-b">File</th>
+                    <th class="py-3 px-4 border-b">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if pending %}
+                    {% for doc in pending %}
+                        <tr class="hover:bg-yellow-50">
+                            <td class="py-2 px-4 border-b text-center">{{ loop.index }}</td>
+                            <td class="py-2 px-4 border-b">
+                                {% if doc.doc_type == 'personal_info' %}
+                                    Personal Info
+                                {% else %}
+                                    Certificate/Memo
+                                {% endif %}
+                            </td>
+                            <td class="py-2 px-4 border-b">
+                                {% if doc.doc_type == 'personal_info' %}
+                                    <strong>Aadhaar:</strong> {{ doc.aadhar }}<br>
+                                    <strong>PAN:</strong> {{ doc.pan }}
+                                {% else %}
+                                    <strong>Name:</strong> {{ doc.name }}<br>
+                                    <strong>Issued To:</strong> {{ doc.issued_to }}<br>
+                                    <strong>Issued By:</strong> {{ doc.issued_by }}<br>
+                                    <strong>Date:</strong> {{ doc.issue_date }}<br>
+                                    <strong>Course:</strong> {{ doc.course }}
+                                {% endif %}
+                            </td>
+                            <td class="py-2 px-4 border-b">{{ doc.uploaded_by }}</td>
+                            <td class="py-2 px-4 border-b">
+                                <a href="{{ url_for('download', filename=doc.filename) }}" class="text-blue-600 hover:underline">Download</a>
+                            </td>
+                            <td class="py-2 px-4 border-b">
+                                <form method="post" action="{{ url_for('approve', file_hash=doc.file_hash) }}" style="display:inline;">
+                                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-1 px-3 rounded shadow transition">Approve</button>
+                                </form>
+                                <form method="post" action="{{ url_for('reject', file_hash=doc.file_hash) }}" style="display:inline;">
+                                    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-1 px-3 rounded shadow transition ml-2">Reject</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="py-4 px-4 text-center text-gray-500">No pending documents.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+    <h3 class="text-xl font-semibold text-gray-700 mb-4">All Approved Documents</h3>
+    <div class="overflow-x-auto">
+        <table class="min-w-full bg-white border border-gray-200 rounded-lg shadow">
+            <thead>
+                <tr class="bg-gray-100 text-gray-700">
+                    <th class="py-3 px-4 border-b">#</th>
+                    <th class="py-3 px-4 border-b">Type</th>
+                    <th class="py-3 px-4 border-b">Details</th>
+                    <th class="py-3 px-4 border-b">Uploaded By</th>
+                    <th class="py-3 px-4 border-b">File</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if certificates %}
+                    {% for block in certificates %}
+                        <tr class="hover:bg-gray-50">
+                            <td class="py-2 px-4 border-b text-center">{{ loop.index }}</td>
+                            <td class="py-2 px-4 border-b">
+                                {% if block.data.doc_type == 'personal_info' %}
+                                    Personal Info
+                                {% else %}
+                                    Certificate/Memo
+                                {% endif %}
+                            </td>
+                            <td class="py-2 px-4 border-b">
+                                {% if block.data.doc_type == 'personal_info' %}
+                                    <strong>Aadhaar:</strong> {{ block.data.aadhar }}<br>
+                                    <strong>PAN:</strong> {{ block.data.pan }}
+                                {% else %}
+                                    <strong>Name:</strong> {{ block.data.name }}<br>
+                                    <strong>Issued To:</strong> {{ block.data.issued_to }}<br>
+                                    <strong>Issued By:</strong> {{ block.data.issued_by }}<br>
+                                    <strong>Date:</strong> {{ block.data.issue_date }}<br>
+                                    <strong>Course:</strong> {{ block.data.course }}
+                                {% endif %}
+                            </td>
+                            <td class="py-2 px-4 border-b">{{ block.data.uploaded_by }}</td>
+                            <td class="py-2 px-4 border-b">
+                                <a href="{{ url_for('download', filename=block.data.filename) }}" class="text-blue-600 hover:underline">Download</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="5" class="py-4 px-4 text-center text-gray-500">No documents approved yet.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
