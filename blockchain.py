@@ -36,6 +36,8 @@ class Blockchain:
     def __init__(self):
         self.chain = []
         self.initialize_chain()
+        self.create_genesis_block()
+
 
     def initialize_chain(self):
         if os.path.exists('chain.json') and os.path.getsize('chain.json') > 0:
@@ -47,7 +49,7 @@ class Blockchain:
         genesis_block = Block(
             index=0,
             timestamp=datetime.now(),
-            data={"name": "Genesis Block", "issued_by": "System"},
+            data={"name": "Genesis Block", "issued_by": "System","genesis": True},
             file_hash="0",
             previous_hash="0"
         )

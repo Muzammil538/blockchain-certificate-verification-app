@@ -93,8 +93,8 @@
                             </td>
                             <td class="py-2 px-4 border-b">
                                 {% if block.data.doc_type == 'personal_info' %}
-                                    <strong>Aadhaar:</strong> {{ block.data.aadhar }}<br>
-                                    <strong>PAN:</strong> {{ block.data.pan }}
+                                    <strong>Aadhaar / PAN:</strong> {{ block.data.aadhar }}<br>
+                                    <strong>Name of Holder:</strong> {{ block.data.holdername }}
                                 {% else %}
                                     <strong>Name:</strong> {{ block.data.name }}<br>
                                     <strong>Issued To:</strong> {{ block.data.issued_to }}<br>

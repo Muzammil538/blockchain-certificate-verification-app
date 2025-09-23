@@ -114,7 +114,7 @@ def upload():
             # Save to pending approvals
             with open(PENDING_CSV, 'a', newline='') as csvfile:
                 if doc_type == 'personal_info':
-                    fieldnames = ['doc_type', 'filename', 'file_hash', 'aadhar', 'pan', 'uploaded_by']
+                    fieldnames = ['doc_type', 'filename', 'file_hash', 'holdername', 'uploaded_by']
                     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
                     if os.stat(PENDING_CSV).st_size == 0:
                         writer.writeheader()
@@ -122,8 +122,7 @@ def upload():
                         'doc_type': doc_type,
                         'filename': filename,
                         'file_hash': file_hash,
-                        'aadhar': request.form.get('aadhar'),
-                        'pan': request.form.get('pan'),
+                        'holdername': request.form.get('holdername'),
                         'uploaded_by': session['username']
                     })
                 else:
@@ -220,8 +219,7 @@ def approve(file_hash):
             data = {
                 "doc_type": approved['doc_type'],
                 "filename": approved['filename'],
-                "aadhar": approved['aadhar'],
-                "pan": approved['pan'],
+                "holdername": approved['holdername'],
                 "uploaded_by": approved['uploaded_by']
             }
         else:
@@ -240,12 +238,15 @@ def approve(file_hash):
         flash('Document approved and added to blockchain!', 'success')
     # Rewrite pending CSV
     with open(PENDING_CSV, 'w', newline='') as csvfile:
-        if pending:
-            fieldnames = pending[0].keys()
-            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            writer.writeheader()
-            for row in pending:
-                writer.writerow(row)
+        # Use the superset of all possible fields
+        fieldnames = [
+            'doc_type', 'filename', 'file_hash', 'holdername',
+            'name', 'issued_to', 'issued_by', 'issue_date', 'course', 'description', 'uploaded_by'
+        ]
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()
+        for row in pending:
+            writer.writerow(row)
     return redirect(url_for('admin_dashboard'))
 
 @app.route('/reject/<file_hash>', methods=['POST'])
@@ -270,12 +271,15 @@ def reject(file_hash):
             pass
     # Rewrite pending CSV
     with open(PENDING_CSV, 'w', newline='') as csvfile:
-        if pending:
-            fieldnames = pending[0].keys()
-            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            writer.writeheader()
-            for row in pending:
-                writer.writerow(row)
+    # Use the superset of all possible fields
+        fieldnames = [
+            'doc_type', 'filename', 'file_hash', 'holdername',
+            'name', 'issued_to', 'issued_by', 'issue_date', 'course', 'description', 'uploaded_by'
+        ]
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()
+        for row in pending:
+            writer.writerow(row)
     flash('Document rejected and file deleted.', 'success')
     return redirect(url_for('admin_dashboard'))
 
