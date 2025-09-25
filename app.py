@@ -113,23 +113,28 @@ def upload():
                 return redirect(url_for('user_dashboard'))
             # Save to pending approvals
             with open(PENDING_CSV, 'a', newline='') as csvfile:
+                # Use superset of all possible fields
+                fieldnames = [
+                    'doc_type', 'filename', 'file_hash', 'aadhar', 'holdername',
+                    'name', 'issued_to', 'issued_by', 'issue_date', 'course', 'description', 'uploaded_by'
+                ]
+                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+                if os.stat(PENDING_CSV).st_size == 0:
+                    writer.writeheader()
                 if doc_type == 'personal_info':
-                    fieldnames = ['doc_type', 'filename', 'file_hash', 'holdername', 'uploaded_by']
-                    writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-                    if os.stat(PENDING_CSV).st_size == 0:
-                        writer.writeheader()
                     writer.writerow({
                         'doc_type': doc_type,
                         'filename': filename,
                         'file_hash': file_hash,
-                        'holdername': request.form.get('holdername'),
-                        'uploaded_by': session['username']
+                        'name': request.form.get('holdername'),  # Name of Holder
+                        'issued_to': request.form.get('aadhar'), # Aadhaar Number
+                        'issued_by': request.form.get('pan'),    # PAN Number
+                        'issue_date': '',                        # Not applicable
+                        'course': '',                            # Not applicable
+                        'description': '',                       # Not applicable
+                        'uploaded_by': str(session.get('username', ''))
                     })
                 else:
-                    fieldnames = ['doc_type', 'filename', 'file_hash', 'name', 'issued_to', 'issued_by', 'issue_date', 'course', 'description', 'uploaded_by']
-                    writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-                    if os.stat(PENDING_CSV).st_size == 0:
-                        writer.writeheader()
                     writer.writerow({
                         'doc_type': doc_type,
                         'filename': filename,
@@ -140,7 +145,7 @@ def upload():
                         'issue_date': request.form.get('issue_date'),
                         'course': request.form.get('course'),
                         'description': request.form.get('description'),
-                        'uploaded_by': session['username']
+                        'uploaded_by': str(session.get('username', ''))
                     })
             flash('Document uploaded and pending admin approval.')
             return redirect(url_for('user_dashboard'))
@@ -219,28 +224,37 @@ def approve(file_hash):
             data = {
                 "doc_type": approved['doc_type'],
                 "filename": approved['filename'],
-                "holdername": approved['holdername'],
-                "uploaded_by": approved['uploaded_by']
+                "name": approved.get('name', ''),
+                "issued_to": approved.get('issued_to', ''),
+                "issued_by": approved.get('issued_by', ''),
+                "issue_date": approved.get('issue_date', ''),
+                "course": approved.get('course', ''),
+                "description": approved.get('description', ''),
+                "uploaded_by": str(approved.get('uploaded_by', ''))
             }
         else:
             data = {
+    # The code snippet appears to be a Python dictionary containing key-value pairs. It is extracting
+    # values from the `approved` dictionary using the `get` method with default values provided in
+    # case the key is not present in the `approved` dictionary. The keys being extracted include
+    # 'doc_type', 'filename', 'name', 'issued_to', 'issued_by', 'issue_date', 'course', 'description',
+    # and 'uploaded_by'. The extracted values are then used to create a new dictionary.
                 "doc_type": approved['doc_type'],
                 "filename": approved['filename'],
-                "name": approved['name'],
-                "issued_to": approved['issued_to'],
-                "issued_by": approved['issued_by'],
-                "issue_date": approved['issue_date'],
-                "course": approved['course'],
-                "description": approved['description'],
-                "uploaded_by": approved['uploaded_by']
+                "name": approved.get('name', ''),
+                "issued_to": approved.get('issued_to', ''),
+                "issued_by": approved.get('issued_by', ''),
+                "issue_date": approved.get('issue_date', ''),
+                "course": approved.get('course', ''),
+                "description": approved.get('description', ''),
+                "uploaded_by": str(approved.get('uploaded_by', ''))
             }
         blockchain.add_block(data, approved['file_hash'])
         flash('Document approved and added to blockchain!', 'success')
-    # Rewrite pending CSV
+    # Always write headers, even if no rows left
     with open(PENDING_CSV, 'w', newline='') as csvfile:
-        # Use the superset of all possible fields
         fieldnames = [
-            'doc_type', 'filename', 'file_hash', 'holdername',
+            'doc_type', 'filename', 'file_hash', 'aadhar', 'holdername',
             'name', 'issued_to', 'issued_by', 'issue_date', 'course', 'description', 'uploaded_by'
         ]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
@@ -269,11 +283,10 @@ def reject(file_hash):
             os.remove(os.path.join(app.config['UPLOAD_FOLDER'], rejected_file))
         except Exception:
             pass
-    # Rewrite pending CSV
+    # Always write headers, even if no rows left
     with open(PENDING_CSV, 'w', newline='') as csvfile:
-    # Use the superset of all possible fields
         fieldnames = [
-            'doc_type', 'filename', 'file_hash', 'holdername',
+            'doc_type', 'filename', 'file_hash', 'aadhar', 'holdername',
             'name', 'issued_to', 'issued_by', 'issue_date', 'course', 'description', 'uploaded_by'
         ]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
